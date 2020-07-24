@@ -19,11 +19,11 @@ import tensorflow as tf
 
 from src.util.renderer import draw_openpose_skeleton
 
-kVidDir = '/home/kanazawa/projects/hmr_sfv/demo_data/videos'
-kOutDir = '/home/kanazawa/projects/hmr_sfv/demo_data/openpose_output'
+kVidDir = '/content/SfV_data/original_video'
+kOutDir = '/content/SfV_data/openpose_output'
 
-kOpenPose = '/scratch1/storage/git_repos/openpose'
-kOpenPoseModel = '/scratch1/storage/git_repos/Realtime_Multi-Person_Pose_Estimation/aj_finetuned_models_170k/'
+kOpenPose = '/content/openpose'
+kOpenPoseModel = '/content/aj_finetuned_models_170k/pose/coco'
 
 tf.app.flags.DEFINE_string('video_dir', kVidDir, 'dir of vids')
 tf.app.flags.DEFINE_string('out_dir', kOutDir, 'dir of output')
@@ -71,36 +71,42 @@ def main(unused_argv):
         print('Making %s' % out_dir)
         makedirs(out_dir)
 
-    vid_paths = sorted(glob(join(vid_dir, "*.mp4")))
+    vid_paths = sorted(glob(join(vid_dir, "*flip_a.mp4")))
 
     # cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_keypoint_json %%s --no_display --render_pose 1' % (
     #     openpose_dir)
     # Maximum accuracy configuration:
-    cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_keypoint_json %%s --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --write_images %%s --write_images_format jpg' % (
+    cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg --model_folder /content/aj_finetuned_models_170k/pose/coco --caffemodel_path pose_iter_170000.caffemodel --prototxt_path pose_deploy_linevec.prototxt' % (
         openpose_dir)
 
-    cmd_base += ' --model_folder %s' % FLAGS.op_model_dir    
+    cmd_base += ' --model_folder %s' % FLAGS.op_model_dir
 
     cmd_extra = ' --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25'
 
     for i, vid_path in enumerate(vid_paths[::-1]):
         vid_name = basename(vid_path)[:-4]
         out_here = join(out_dir, vid_name)
+        print(out_here)
         # bbox_path = join(out_dir, vid_name + '_bboxes_tmpwind25.h5')
         bbox_path = join(out_dir, vid_name + '_bboxes.h5')
+        print(bbox_path)
         if exists(bbox_path):
+            print('nismo uradili digest_openpose')
             continue
 
         if not exists(out_here):
+            print('ovo je ako ne postoji out_here')
             print('Working on %s %d/%d' % (vid_name, i, len(vid_paths)))
             makedirs(out_here)
         if len(glob(join(out_here, "*.json"))) > 0:
             if not exists(bbox_path):
+                print('ovo ne znam sta je')
                 digest_openpose(out_here, vid_path, bbox_path)
         # else:
         if not exists(bbox_path):
             cmd = cmd_base % (vid_path, out_here, out_here)
             print(cmd)
+            print('nemamo bbox pa idemo da pokusamo da ga dobijemo')
             res = system(cmd)
             if res > 0:
                 print('somethign wrong?')
@@ -410,11 +416,11 @@ def fill_in_bboxes(bboxes, start_frame, end_frame):
             # but make sure that kp score is all 0
             fill_this[1][:, 2] = 0.
             bboxes_filled.append(fill_this)
-                        
+
 
     return bboxes_filled
-                
-        
+
+
 def get_rect(bbox0, linestyle='solid', ecolor='red'):
     """
     for drawing..
@@ -462,7 +468,7 @@ def read_json(json_path):
         data = json.load(f)
     kps = []
     for people in data['people']:
-        kp = np.array(people['pose_keypoints']).reshape(-1, 3)
+        kp = np.array(people['pose_keypoints_2d']).reshape(-1, 3)
         kps.append(kp)
     return kps
 
@@ -482,7 +488,7 @@ def nonmaxsupp(bboxes0, valid_kps0):
     x2 = x1 + bboxes[:, 2] - 1
     y2 = x2 + bboxes[:, 3] - 1
     area = bboxes[:, 2] * bboxes[:, 3]
-    
+
     # Small first,,
     idxs = np.argsort(scores)
 
@@ -506,7 +512,7 @@ def nonmaxsupp(bboxes0, valid_kps0):
 			                       np.where(overlap > NMS_THR)[0])))
 
     return bboxes0[pick], valid_kps0[pick]
-                
+
 def get_bbox(kp):
     vis = kp[:, 2] > VIS_THR
     if np.sum(vis) < NUM_VIS_THR:

@@ -62,7 +62,7 @@ class Refiner(object):
         input_size = (self.batch_size, self.img_size, self.img_size, 3)
         self.images_pl = tf.placeholder(tf.float32, shape=input_size)
         self.img_feat_pl = tf.placeholder(tf.float32, shape=(self.batch_size, 2048))
-        self.img_feat_var = tf.get_variable("img_feat_var", dtype=tf.float32, shape=(self.batch_size, 2048))        
+        self.img_feat_var = tf.get_variable("img_feat_var", dtype=tf.float32, shape=(self.batch_size, 2048))
         kp_size = (self.batch_size, 19, 3)
         self.kps_pl = tf.placeholder(tf.float32, shape=kp_size)
 
@@ -108,14 +108,14 @@ class Refiner(object):
             print('never here')
             import ipdb
             ipdb.set_trace()
-            
+
         all_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
         # Exclude the new variable.
         all_vars_filtered = [v for v in all_vars if ('img_feat_var' not in v.name) and ('theta_var' not in v.name)]
         self.saver = tf.train.Saver(all_vars_filtered)
 
         if sess is None:
-            self.sess = tf.Session()            
+            self.sess = tf.Session()
         else:
             self.sess = sess
 
@@ -148,7 +148,7 @@ class Refiner(object):
     def build_refine_model(self):
         img_enc_fn = Encoder_resnet
         threed_enc_fn = Encoder_fc3_dropout
-        
+
         self.img_feat, self.E_var = img_enc_fn(
             self.images_pl,
             is_training=False,
@@ -399,22 +399,22 @@ class Refiner(object):
                 import matplotlib.pyplot as plt
                 plt.ion()
                 plt.figure(2)
-                plt.clf()                
-                plt.suptitle('iter %d' % step) 
+                plt.clf()
+                plt.suptitle('iter %d' % step)
                 plt.subplot(311)
                 plt.imshow(op_img)
                 plt.axis('off')
                 plt.title('openpose joints')
                 plt.subplot(312)
                 plt.imshow(proj_img)
-                plt.axis('off')                
+                plt.axis('off')
                 plt.title('proj joints')
                 plt.subplot(313)
                 plt.imshow(rend_img)
-                plt.axis('off')                                
+                plt.axis('off')
                 plt.title('rend verts')
                 plt.pause(1e-3)
-                import ipdb; ipdb.set_trace()                
+                import ipdb; ipdb.set_trace()
 
         total_time = time.time() - tbegin
         print('Total time %g' % total_time)
@@ -450,7 +450,7 @@ class Refiner(object):
         # ]
         rend_imgs = [
             self.renderer(vert + np.array([0, 0, 6])) for vert in result['verts'][::self.viz_sub]
-        ]        
+        ]
         rend_img = np.hstack(rend_imgs)
         t1 = time.time()
         print('Took %f sec to render %d imgs' % (t1 - t0, len(rend_imgs)))
