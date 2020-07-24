@@ -298,7 +298,7 @@ def join_csv():
 
 def main(config):
     np.random.seed(5)
-    video_paths = sorted(glob(join(config.vid_dir, "*flip_a.mp4")))
+    video_paths = sorted(glob(join(config.vid_dir, "*aco.mp4")))
     # Figure out the save name.
     pred_dir = get_pred_prefix(config.load_path)
     # import ipdb; ipdb.set_trace()

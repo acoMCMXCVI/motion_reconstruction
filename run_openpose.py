@@ -71,7 +71,7 @@ def main(unused_argv):
         print('Making %s' % out_dir)
         makedirs(out_dir)
 
-    vid_paths = sorted(glob(join(vid_dir, "*flip_a.mp4")))
+    vid_paths = sorted(glob(join(vid_dir, "*aco.mp4")))
 
     # cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_keypoint_json %%s --no_display --render_pose 1' % (
     #     openpose_dir)
