@@ -79,7 +79,7 @@ def main(unused_argv):
     #      With aug models: cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg --model_folder /content/aj_finetuned_models_170k/pose/coco --caffemodel_path pose_iter_170000.caffemodel --prototxt_path pose_deploy_linevec.prototxt' % (
     #    openpose_dir)
     # Maximum accuracy configuration:
-    cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg ' % (
+    cmd_base = 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/content/openpose/content/local/usr/local/lib; %s/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg ' % (
         openpose_dir)
 
     cmd_base += ' --model_folder %s' % FLAGS.op_model_dir
