@@ -232,8 +232,9 @@ def run_video(frames, per_frame_people, config, out_mov_path):
         imwrite(out_name, final_rend_img)
 
     # Write video.
-    cmd = 'ffmpeg_static -y -threads 16  -i %s/frame%%03d.png -profile:v baseline -level 3.0 -c:v libx264 -pix_fmt yuv420p -an -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" %s' % (
-        temp_dir, out_mov_path)
+    #cmd = 'ffmpeg_static -y -threads 16  -i %s/frame%%03d.png -profile:v baseline -level 3.0 -c:v libx264 -pix_fmt yuv420p -an -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" %s' % (
+    #    temp_dir, out_mov_path)
+    cmd = 'ffmpeg -r 24 -i %s/frame%03d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p %s'% (temp_dir, out_mov_path)
     system(cmd)
     shutil.rmtree(temp_dir)
 
