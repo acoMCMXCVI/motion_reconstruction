@@ -41,7 +41,7 @@ def batch_skew(vec, batch_size=None):
 
 def batch_rodrigues(theta, name=None):
     """
-    Theta is N x 3
+    Theta is N x 3 broj kostiju * 3 
     """
     with tf.name_scope(name, "batch_rodrigues", [theta]):
         batch_size = theta.shape.as_list()[0]

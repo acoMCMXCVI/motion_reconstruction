@@ -17,6 +17,7 @@ from __future__ import print_function
 import cv2
 from absl import flags
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 from os.path import exists, join, basename, dirname
 from os import makedirs
 import os
@@ -79,6 +80,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
     out_res_path = out_mov_path.replace('.mp4', '.h5')
 
+
+
     if not exists(out_res_path) or config.viz:
         # Run HMR + refinement.
         tf.reset_default_graph()
@@ -88,6 +91,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
         results = model.predict(proc_imgs, proc_kps, scale_factors, offsets)
         # Pack proc_param into result.
         results['proc_params'] = proc_params
+
+
 
 
         joints_names = ['Ankle.R_x', 'Ankle.R_y', 'Ankle.R_z',
@@ -110,6 +115,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
                    'Ear.L_x', 'Ear.L_y', 'Ear.L_z',
                    'Ear.R_x', 'Ear.R_y', 'Ear.R_z']
 
+
+        sequence = []
 
         # Pack results:
         result_dict = {}
@@ -142,6 +149,17 @@ def run_video(frames, per_frame_people, config, out_mov_path):
             smpl.pose[:] = pose
             verts = smpl.r
 
+
+            bones = []
+            pose_array = pose.reshape(-1,3)
+            for i in range(24):
+                r = R.from_rotvec(pose_array[i])
+                print(r.as_euler('xyz', degrees=True))
+                bones.append(r.as_euler('xyz', degrees=True))
+
+            sequence.append(bones)
+
+
             result_here = {
                 'theta': np.expand_dims(theta, 0),
                 'joints': np.expand_dims(results['joints'][i], 0),
@@ -152,6 +170,9 @@ def run_video(frames, per_frame_people, config, out_mov_path):
                 'proc_param': proc_param
             }
             result_dict[i] = [result_here]
+
+        sequence_array = np.array(sequence)
+        np.save('test.npy', sequence_array)
 
         # Save results & write bvh.
         dd.io.save(out_res_path, result_dict)
