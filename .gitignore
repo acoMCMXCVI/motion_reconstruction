@@ -4,3 +4,5 @@ logs*/
 *.DS_Store
 *.pyc
 demo_data
+csv_to_bvh.blend
+csv_to_bvh.py
