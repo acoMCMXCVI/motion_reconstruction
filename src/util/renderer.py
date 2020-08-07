@@ -242,20 +242,27 @@ def get_original(proc_param, verts, cam, joints):
     img_size = proc_param['target_size']
     undo_scale = 1. / np.array(proc_param['scale'])
 
+    #scale sa 224 na originalnu velicinu bboxa???
     cam_s = cam[0]
+
     cam_pos = cam[1:]
+    #principal_pt sredina slike 224 x 224
     principal_pt = np.array([img_size, img_size]) / 2.
     flength = 500.
+    #racunamo udaljenost od kamere
     tz = flength / (0.5 * img_size * cam_s)
     trans = np.hstack([cam_pos, tz])
     vert_shifted = verts + trans
 
     start_pt = proc_param['start_pt']# - 0.5 * img_size
+    #principal_pt je zapravo sredina onog kvadrata,
+    #na njega dodajemo start pt kako bi ga pomerili u tacku u koju treba
+    #i mozimo sa undo_scale kako bi dobili originalno mesto
     final_principal_pt = (principal_pt + start_pt) * undo_scale
     cam_for_render = np.hstack(
         [np.mean(flength * undo_scale), final_principal_pt])
 
-    joints = ((joints + 1) * 0.5) * img_size    
+    joints = ((joints + 1) * 0.5) * img_size
     # This is in padded image.
     kp_original = (joints + proc_param['start_pt']) * undo_scale
     # Subtract padding from joints.
@@ -513,7 +520,7 @@ def draw_openpose_skeleton(input_image, joints, draw_edges=True, vis=None, radiu
     17: L Ear
 
     [18: Head (always 0)]
-    This function converts the order into my lsp-coco skeleton (19 points) and uses that draw function.    
+    This function converts the order into my lsp-coco skeleton (19 points) and uses that draw function.
     """
     if joints.shape[0] != 2:
         joints = joints.T

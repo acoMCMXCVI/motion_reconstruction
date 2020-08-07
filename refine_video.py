@@ -117,6 +117,7 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
 
         sequence = []
+        positions = []
 
         # Pack results:
         result_dict = {}
@@ -150,6 +151,18 @@ def run_video(frames, per_frame_people, config, out_mov_path):
             verts = smpl.r
 
 
+
+            cam_s = results['cams'][i][0]
+            cam_pos = results['cams'][i][1:]
+            #racunamo udaljenost od kamere
+            tz = 500. / (0.5 * 224 * cam_s)
+            trans = np.hstack([cam_pos, tz])
+            print('trans' + str(trans))
+
+            positions.append(trans)
+
+
+
             bones = []
             pose_array = pose.reshape(-1,3)
             for i in range(24):
@@ -173,6 +186,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
         sequence_array = np.array(sequence)
         np.save('test.npy', sequence_array)
+        np.savetxt("rot_out.csv", sequence_array.reshape(sequence_array.shape[0], -1), delimiter=",")
+        np.savetxt("pos_out.csv", np.array(positions), delimiter=",")
 
         # Save results & write bvh.
         dd.io.save(out_res_path, result_dict)
