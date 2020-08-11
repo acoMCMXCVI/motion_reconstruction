@@ -118,6 +118,7 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
         sequence = []
         positions = []
+        bboxs = []
 
         # Pack results:
         result_dict = {}
@@ -125,6 +126,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
         for i, (frame, proc_param) in enumerate(zip(used_frames, proc_params)):
             bbox = proc_param['bbox']
             op_kp = proc_param['op_kp']
+
+            bboxs.append(bbox)
 
             joints_export = pd.DataFrame(results['joints3d'][i].reshape(1,57), columns=joints_names)
             joints_export.index.name = 'frame'
@@ -165,8 +168,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
             bones = []
             pose_array = pose.reshape(-1,3)
-            for i in range(24):
-                r = R.from_rotvec(pose_array[i])
+            for j in range(24):
+                r = R.from_rotvec(pose_array[j])
                 print(r.as_euler('xyz', degrees=True))
                 bones.append(r.as_euler('xyz', degrees=True))
 
@@ -185,7 +188,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
             result_dict[i] = [result_here]
 
         sequence_array = np.array(sequence)
-        np.save('test.npy', sequence_array)
+        #np.save('test.npy', sequence_array)
+        np.save('bbox.npy', np.array(bboxs))
         np.savetxt("rot_out.csv", sequence_array.reshape(sequence_array.shape[0], -1), delimiter=",")
         np.savetxt("pos_out.csv", np.array(positions), delimiter=",")
 
