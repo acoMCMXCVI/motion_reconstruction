@@ -19,12 +19,12 @@ import tensorflow as tf
 
 from src.util.renderer import draw_openpose_skeleton
 
-kVidDir = '/content/SfV_data/original_video'
-kOutDir = '/content/SfV_data/openpose_output'
+kVidDir = '/mnt/working_files/wonder_dynamics/pipeline/data/original_videos'
+kOutDir = '/mnt/working_files/wonder_dynamics/pipeline/data/openpose_output'
 
-kOpenPose = '/content/openpose'
+kOpenPose = '/mnt/working_files/wonder_dynamics/openpose_lib_py27'
 #/content/aj_finetuned_models_170k/pose/coco
-kOpenPoseModel = '/content/openpose/models'
+kOpenPoseModel = '/mnt/working_files/wonder_dynamics/openpose_lib_py27/models'
 
 tf.app.flags.DEFINE_string('video_dir', kVidDir, 'dir of vids')
 tf.app.flags.DEFINE_string('out_dir', kOutDir, 'dir of output')
@@ -79,7 +79,7 @@ def main(unused_argv):
     #      With aug models: cmd_base = '%s/build/examples/openpose/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg --model_folder /content/aj_finetuned_models_170k/pose/coco --caffemodel_path pose_iter_170000.caffemodel --prototxt_path pose_deploy_linevec.prototxt' % (
     #    openpose_dir)
     # Maximum accuracy configuration:
-    cmd_base = 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/content/openpose/content/local/usr/local/lib; %s/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg ' % (
+    cmd_base = '%s/openpose.bin --video %%s --write_json %%s --model_pose COCO --net_resolution "1312x736" --scale_number 4 --scale_gap 0.25 --display 0  --write_images %%s --write_images_format jpg ' % (
         openpose_dir)
 
     cmd_base += ' --model_folder %s' % FLAGS.op_model_dir

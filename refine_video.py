@@ -41,11 +41,11 @@ from src.refiner import Refiner
 
 
 # Defaults:
-kVidDir = '/content/SfV_data/original_video/'
+kVidDir = '/mnt/working_files/wonder_dynamics/pipeline/data/original_videos'
 # Where the smoothed results will be stored.
-kOutDir = '/content/SfV_data/openpose_output/'
+kOutDir = '/mnt/working_files/wonder_dynamics/pipeline/data/openpose_output'
 # Holds h5 for each video, which stores OP outputs, after trajectory assignment.
-kOpDir = '/content/SfV_data/openpose_output/'
+kOpDir = '/mnt/working_files/wonder_dynamics/pipeline/data/openpose_output'
 
 
 kMaxLength = 1000
@@ -62,7 +62,6 @@ flags.DEFINE_string('op_dir', kOpDir,
 
 model = None
 sess = None
-
 
 def run_video(frames, per_frame_people, config, out_mov_path):
     """
@@ -142,7 +141,8 @@ def run_video(frames, per_frame_people, config, out_mov_path):
             joints_export['hip.Center_y'] = hipCenter.iloc[0][1::3].sum()/2
             joints_export['hip.Center_z'] = hipCenter.iloc[0][2::3].sum()/2
 
-            joints_export.to_csv("/content/csv/"+str(i)+".csv")
+            #joints locations
+            #joints_export.to_csv("/mnt/working_files/wonder_dynamics/pipeline/data/csv"+str(i)+".csv")
 
             # Recover verts from SMPL params.
             theta = results['theta'][i]
@@ -189,13 +189,13 @@ def run_video(frames, per_frame_people, config, out_mov_path):
 
         sequence_array = np.array(sequence)
         #np.save('test.npy', sequence_array)
-        np.save('bbox.npy', np.array(bboxs))
-        np.savetxt("rot_out.csv", sequence_array.reshape(sequence_array.shape[0], -1), delimiter=",")
-        np.savetxt("pos_out.csv", np.array(positions), delimiter=",")
+        np.save('/mnt/working_files/wonder_dynamics/pipeline/data/mr_output/bbox.npy', np.array(bboxs))
+        np.savetxt("/mnt/working_files/wonder_dynamics/pipeline/data/mr_output/rot_out.csv", sequence_array.reshape(sequence_array.shape[0], -1), delimiter=",")
+        np.savetxt("/mnt/working_files/wonder_dynamics/pipeline/data/mr_output/pos_out.csv", np.array(positions), delimiter=",")
 
         # Save results & write bvh.
         dd.io.save(out_res_path, result_dict)
-        join_csv()
+        #join_csv()
         # TODO.
         #bvh_path = out_res_path.replace('.h5', '.bvh')
         #if not exists(bvh_path):
@@ -204,7 +204,7 @@ def run_video(frames, per_frame_people, config, out_mov_path):
         result_dict = dd.io.load(out_res_path)
 
     # Render results into video.
-    temp_dir = tempfile.mkdtemp(dir='/content/SfV_data/tmp')
+    temp_dir = tempfile.mkdtemp(dir='/mnt/working_files/wonder_dynamics/pipeline/data/tmp')
     print('writing to %s' % temp_dir)
 
     used_frames = frames[start_fr:end_fr + 1]
@@ -274,7 +274,7 @@ def run_video(frames, per_frame_people, config, out_mov_path):
     # Write video.
     #cmd = 'ffmpeg_static -y -threads 16  -i %s/frame%%03d.png -profile:v baseline -level 3.0 -c:v libx264 -pix_fmt yuv420p -an -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" %s' % (
     #    temp_dir, out_mov_path)
-    cmd = 'ffmpeg -r 24 -i %s/frame%03d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p %s'% (temp_dir, out_mov_path)
+    cmd = 'ffmpeg -r 24 -i %s/frame%%03d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p data/mr_output/new.mp4'% (temp_dir)
     system(cmd)
     shutil.rmtree(temp_dir)
 
@@ -343,7 +343,7 @@ def main(config):
     # Figure out the save name.
     pred_dir = get_pred_prefix(config.load_path)
     # import ipdb; ipdb.set_trace()
-    pred_dir = '/content/SfV_data/data_smooth'
+    pred_dir = '/mnt/working_files/wonder_dynamics/pipeline/data/data_smooth'
 
     for i, vid_path in enumerate(video_paths[:]):
         out_mov_path = join(pred_dir, basename(vid_path).replace('.mp4', '.h5'))
@@ -351,7 +351,9 @@ def main(config):
             print('working on %s' % basename(vid_path))
             frames, per_frame_people, valid = read_data(vid_path, config.op_dir, max_length=kMaxLength)
             if valid:
+                print('out_mov_path')
                 run_video(frames, per_frame_people, config, out_mov_path)
+
 
     print('Finished writing to %s' % pred_dir)
 

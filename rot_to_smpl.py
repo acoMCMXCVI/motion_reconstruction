@@ -9,7 +9,7 @@ cmds.loadPlugin( allPlugins=True )
 
 
 
-cmds.file('D:/Poslovi/Aethar/Job/maya_to_unreal/smpl.fbx', i=True, type='FBX')
+cmds.file('data/smpl.fbx', i=True, type='FBX')
 
 cmds.currentTime(0, edit=True)
 
@@ -44,9 +44,9 @@ fullpath = 'D:/Poslovi/Aethar/Job/maya_to_unreal/test.csv'
 
 with open(fullpath, 'r') as csvfile:
     lines = list(csv.reader(csvfile, delimiter=','))
-    
+
     num_frames = len(lines)
-        
+
     cmds.playbackOptions(minTime=0)
     cmds.playbackOptions(maxTime=num_frames)
     cmds.playbackOptions(animationStartTime=0)
@@ -64,15 +64,15 @@ with open(fullpath, 'r') as csvfile:
                        fline[60:63], fline[63:66], fline[66:69], fline[69:72]]
 
 
-        
+
         current_frame = cmds.currentTime(q=True)
-        
+
         for jointt, angle in zip(jointlist, coordinates):
             cmds.rotate(angle[0], angle[1], angle[2], jointt)
             cmds.setKeyframe(jointt)
-  
+
 
         cmds.currentTime(current_frame + 1, edit=True)
-     
+
     cmds.select( jointlist, add=True)
     cmds.file('D:/Poslovi/Aethar/Job/maya_to_unreal/x5.fbx', force = True, options = "v = 0", type = "FBX export", exportSelected = True)

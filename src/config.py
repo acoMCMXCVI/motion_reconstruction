@@ -65,7 +65,8 @@ def get_config():
     config = flags.FLAGS
     config(sys.argv)
 
-    setattr(config, 'img_size', 224)
+
     setattr(config, 'data_format', 'NHWC')
+    setattr(config, 'img_size', 224)
 
     return config
